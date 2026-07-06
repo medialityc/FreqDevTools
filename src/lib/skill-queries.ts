@@ -33,9 +33,21 @@ function authorLabel(author: { name: string | null; email: string }): string {
 export async function getSkillsList(opts: {
   category?: string;
   sort: SkillSort;
+  q?: string;
 }): Promise<SkillListItem[]> {
+  const q = opts.q?.trim();
   const skills = await prisma.skill.findMany({
-    where: opts.category ? { category: opts.category } : undefined,
+    where: {
+      ...(opts.category ? { category: opts.category } : {}),
+      ...(q
+        ? {
+            OR: [
+              { title: { contains: q } },
+              { description: { contains: q } },
+            ],
+          }
+        : {}),
+    },
     include: { author: { select: { name: true, email: true } } },
   });
   const scores = await getVoteScores();

@@ -18,12 +18,12 @@ export const dynamic = "force-dynamic";
 export default async function SkillsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; sort?: string }>;
+  searchParams: Promise<{ category?: string; sort?: string; q?: string }>;
 }) {
   const sp = await searchParams;
   const sort: SkillSort =
     sp.sort === "copies" || sp.sort === "recent" ? sp.sort : "votes";
-  const skills = await getSkillsList({ category: sp.category, sort });
+  const skills = await getSkillsList({ category: sp.category, sort, q: sp.q });
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">

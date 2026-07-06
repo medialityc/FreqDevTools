@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
+import { SearchBox } from "@/components/SearchBox";
 import { CredentialForm, type CredentialView } from "./CredentialForm";
 import { CredentialItem } from "./CredentialItem";
 
@@ -18,10 +19,21 @@ export function CredentialsManager({
   const router = useRouter();
   const [groupBy, setGroupBy] = useState<GroupBy>("domain");
   const [adding, setAdding] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return credentials;
+    return credentials.filter((c) =>
+      [c.name, c.domain, c.username]
+        .filter(Boolean)
+        .some((v) => v!.toLowerCase().includes(q)),
+    );
+  }, [credentials, query]);
 
   const groups = useMemo(() => {
     const map = new Map<string, CredentialView[]>();
-    for (const c of credentials) {
+    for (const c of filtered) {
       const key =
         groupBy === "domain"
           ? c.domain?.trim() || "Sin dominio"
@@ -30,10 +42,16 @@ export function CredentialsManager({
       map.get(key)!.push(c);
     }
     return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, [credentials, groupBy]);
+  }, [filtered, groupBy]);
 
   return (
     <div className="space-y-6">
+      <SearchBox
+        value={query}
+        onChange={setQuery}
+        placeholder="Buscar por nombre, dominio o usuario..."
+        className="max-w-md"
+      />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm">
           <span className="text-muted-foreground">Agrupar por:</span>
@@ -80,6 +98,12 @@ export function CredentialsManager({
           <CardContent className="text-sm text-muted-foreground">
             No tienes credenciales guardadas. Crea la primera con{" "}
             <strong>Nueva credencial</strong>.
+          </CardContent>
+        </Card>
+      ) : filtered.length === 0 ? (
+        <Card>
+          <CardContent className="text-sm text-muted-foreground">
+            Sin resultados para “{query}”.
           </CardContent>
         </Card>
       ) : (

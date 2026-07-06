@@ -148,7 +148,7 @@ export function DateTimePicker({
       </button>
 
       {open && view && (
-        <div className="absolute z-50 mt-1 w-72 rounded-xl border border-border bg-card p-3 shadow-lg">
+        <div className="absolute z-50 mt-1 w-80 rounded-xl border border-border bg-card p-3 shadow-lg">
           <div className="mb-2 flex items-center justify-between">
             <button
               type="button"
@@ -211,66 +211,78 @@ export function DateTimePicker({
             })}
           </div>
 
-          <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
-            <span className="text-sm text-muted-foreground">Hora</span>
-            <Select
-              value={hour}
-              onChange={(e) => {
-                const h = Number(e.target.value);
-                setHour(h);
-                emit(selected, h, minute, second);
-              }}
-              className="h-9 w-16"
-              aria-label="Hora"
-            >
-              {Array.from({ length: 24 }).map((_, h) => (
-                <option key={h} value={h}>
-                  {pad(h)}
-                </option>
-              ))}
-            </Select>
-            <span>:</span>
-            <Select
-              value={minute}
-              onChange={(e) => {
-                const mi = Number(e.target.value);
-                setMinute(mi);
-                emit(selected, hour, mi, second);
-              }}
-              className="h-9 w-16"
-              aria-label="Minutos"
-            >
-              {Array.from({ length: minuteCount }).map((_, i) => (
-                <option key={i} value={i * minuteStep}>
-                  {pad(i * minuteStep)}
-                </option>
-              ))}
-            </Select>
-            {withSeconds && (
-              <>
-                <span>:</span>
+          <div className="mt-3 space-y-2 border-t border-border pt-3">
+            <div className="flex items-end gap-2">
+              <label className="flex-1">
+                <span className="mb-1 block text-xs text-muted-foreground">
+                  Hora
+                </span>
                 <Select
-                  value={second}
+                  value={hour}
                   onChange={(e) => {
-                    const se = Number(e.target.value);
-                    setSecond(se);
-                    emit(selected, hour, minute, se);
+                    const h = Number(e.target.value);
+                    setHour(h);
+                    emit(selected, h, minute, second);
                   }}
-                  className="h-9 w-16"
-                  aria-label="Segundos"
+                  className="h-9 w-full px-2 text-center"
+                  aria-label="Hora"
                 >
-                  {Array.from({ length: 60 }).map((_, s) => (
-                    <option key={s} value={s}>
-                      {pad(s)}
+                  {Array.from({ length: 24 }).map((_, h) => (
+                    <option key={h} value={h}>
+                      {pad(h)}
                     </option>
                   ))}
                 </Select>
-              </>
-            )}
+              </label>
+              <label className="flex-1">
+                <span className="mb-1 block text-xs text-muted-foreground">
+                  Min
+                </span>
+                <Select
+                  value={minute}
+                  onChange={(e) => {
+                    const mi = Number(e.target.value);
+                    setMinute(mi);
+                    emit(selected, hour, mi, second);
+                  }}
+                  className="h-9 w-full px-2 text-center"
+                  aria-label="Minutos"
+                >
+                  {Array.from({ length: minuteCount }).map((_, i) => (
+                    <option key={i} value={i * minuteStep}>
+                      {pad(i * minuteStep)}
+                    </option>
+                  ))}
+                </Select>
+              </label>
+              {withSeconds && (
+                <label className="flex-1">
+                  <span className="mb-1 block text-xs text-muted-foreground">
+                    Seg
+                  </span>
+                  <Select
+                    value={second}
+                    onChange={(e) => {
+                      const se = Number(e.target.value);
+                      setSecond(se);
+                      emit(selected, hour, minute, se);
+                    }}
+                    className="h-9 w-full px-2 text-center"
+                    aria-label="Segundos"
+                  >
+                    {Array.from({ length: 60 }).map((_, s) => (
+                      <option key={s} value={s}>
+                        {pad(s)}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
+              )}
+            </div>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="ml-auto rounded-lg bg-primary px-3 py-1.5 text-sm text-primary-foreground"
+              className="w-full rounded-lg bg-primary px-3 py-1.5 text-sm text-primary-foreground"
             >
               Listo
             </button>
