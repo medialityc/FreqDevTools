@@ -9,7 +9,7 @@ export interface ShareLinkView {
   createdAt: string;
 }
 
-export interface EnvFileView {
+export interface VaultFileView {
   id: string;
   name: string;
   createdAt: string;

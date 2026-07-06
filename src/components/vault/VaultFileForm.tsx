@@ -2,19 +2,22 @@
 
 import { useRef, useState, useTransition } from "react";
 import { Upload } from "lucide-react";
-import { createEnvFile, updateEnvFile } from "@/actions/env";
+import { createVaultFile, updateVaultFile } from "@/actions/vault";
+import type { VaultConfig } from "@/lib/vault";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Textarea } from "@/components/ui/Textarea";
 
-export function EnvFileForm({
+export function VaultFileForm({
+  config,
   fileId,
   initialName = "",
   initialContent = "",
   onSuccess,
   onCancel,
 }: {
+  config: VaultConfig;
   fileId?: string;
   initialName?: string;
   initialContent?: string;
@@ -42,8 +45,8 @@ export function EnvFileForm({
     fd.set("content", content);
     start(async () => {
       const res = isEdit
-        ? await updateEnvFile(fileId!, undefined, fd)
-        : await createEnvFile(undefined, fd);
+        ? await updateVaultFile(fileId!, undefined, fd)
+        : await createVaultFile(config.kind, undefined, fd);
       if (res?.error) setError(res.error);
       else onSuccess();
     });
@@ -53,12 +56,12 @@ export function EnvFileForm({
     <div className="space-y-3">
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1">
-          <Label htmlFor="env-name">Nombre *</Label>
+          <Label htmlFor="vault-name">Nombre *</Label>
           <Input
-            id="env-name"
+            id="vault-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder=".env.production"
+            placeholder={config.namePlaceholder}
           />
         </div>
         <div>
@@ -80,13 +83,13 @@ export function EnvFileForm({
         </div>
       </div>
       <div>
-        <Label htmlFor="env-content">Contenido</Label>
+        <Label htmlFor="vault-content">Contenido</Label>
         <Textarea
-          id="env-content"
+          id="vault-content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           className="min-h-56 font-mono text-sm"
-          placeholder="API_KEY=...&#10;DATABASE_URL=..."
+          placeholder={config.contentPlaceholder}
         />
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}

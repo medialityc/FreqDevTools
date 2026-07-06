@@ -9,9 +9,11 @@ const links = [
   { href: "/tools/guid", label: "GUID" },
   { href: "/tools/api-keys", label: "API Keys" },
   { href: "/tools/csharp-serializer", label: "C# → JSON" },
+  { href: "/tools/datetime", label: "DateTime" },
   { href: "/skills", label: "Skills" },
   { href: "/credentials", label: "Credenciales" },
   { href: "/env", label: "Env" },
+  { href: "/workflows", label: "Workflows" },
 ];
 
 export async function Nav() {

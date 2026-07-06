@@ -3,18 +3,20 @@
 import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Copy, Link2, Trash2 } from "lucide-react";
-import { createShareLink, revokeShareLink } from "@/actions/env";
+import {
+  createVaultShareLink,
+  revokeVaultShareLink,
+} from "@/actions/vault";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 import { Textarea } from "@/components/ui/Textarea";
 import { DateTimePicker } from "@/components/DateTimePicker";
-import type { ShareLinkView } from "./types";
+import type { ShareLinkView } from "@/lib/vault-types";
 
 function ShareLinkRow({ link }: { link: ShareLinkView }) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [pending, start] = useTransition();
-
   const active = !link.revoked && !link.expired;
 
   function copy() {
@@ -27,7 +29,7 @@ function ShareLinkRow({ link }: { link: ShareLinkView }) {
 
   function revoke() {
     start(async () => {
-      await revokeShareLink(link.id);
+      await revokeVaultShareLink(link.id);
       router.refresh();
     });
   }
@@ -96,7 +98,7 @@ export function SharePanel({
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     start(async () => {
-      const res = await createShareLink(fileId, undefined, fd);
+      const res = await createVaultShareLink(fileId, undefined, fd);
       if (res?.error) setError(res.error);
       else {
         setError(null);

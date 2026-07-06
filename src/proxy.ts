@@ -6,7 +6,7 @@ import { authConfig } from "@/lib/auth.config";
 const { auth } = NextAuth(authConfig);
 
 // Rutas que requieren sesión iniciada.
-const PROTECTED = ["/credentials", "/env", "/skills/new"];
+const PROTECTED = ["/credentials", "/env", "/workflows", "/skills/new"];
 // Rutas que requieren rol ADMIN.
 const ADMIN_ONLY = ["/admin"];
 // Rutas de auth: si ya hay sesión, redirigir al inicio.

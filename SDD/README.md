@@ -45,6 +45,9 @@ Una plataforma con herramientas de uso diario para desarrolladores, más zonas p
 - [`phase-4-credentials.md`](./phase-4-credentials.md) — gestor de credenciales.
 - [`phase-5-env-vault.md`](./phase-5-env-vault.md) — bóveda `.env` + compartición.
 - [`phase-6-dashboard.md`](./phase-6-dashboard.md) — dashboard y pulido.
+- [`phase-7-datetime-tool.md`](./phase-7-datetime-tool.md) — herramienta DateTime → C#.
+- [`phase-8-workflows.md`](./phase-8-workflows.md) — bóveda de workflows de GitHub Actions.
+- [`phase-9-search.md`](./phase-9-search.md) — buscador en páginas de listado.
 
 ## Estructura de carpetas objetivo
 
@@ -58,11 +61,13 @@ src/
     tools/guid/page.tsx
     tools/api-keys/page.tsx
     tools/csharp-serializer/page.tsx
+    tools/datetime/page.tsx     conversor de fecha a formatos C#
     skills/page.tsx             lista pública
     skills/[id]/page.tsx        detalle
     skills/new/page.tsx         publicar (protegido)
     credentials/page.tsx        protegido
-    env/page.tsx                protegido
+    env/page.tsx                bóveda .env (protegido)
+    workflows/page.tsx          bóveda de workflows (protegido)
     share/[token]/page.tsx      ver .env compartido (login + email)
     admin/page.tsx              protegido ADMIN
     api/auth/[...nextauth]/route.ts

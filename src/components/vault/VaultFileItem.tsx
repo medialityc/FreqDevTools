@@ -3,19 +3,26 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, FileText, Pencil, Share2, Trash2 } from "lucide-react";
-import { deleteEnvFile, revealEnvContent } from "@/actions/env";
+import { deleteVaultFile, revealVaultContent } from "@/actions/vault";
+import type { VaultConfig } from "@/lib/vault";
+import type { VaultFileView } from "@/lib/vault-types";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { CopyButton } from "@/components/CopyButton";
-import { EnvFileForm } from "./EnvFileForm";
+import { VaultFileForm } from "./VaultFileForm";
 import { SharePanel } from "./SharePanel";
-import type { EnvFileView } from "./types";
 
 function slugify(name: string): string {
-  return name.replace(/[^a-zA-Z0-9._-]+/g, "_") || "archivo.env";
+  return name.replace(/[^a-zA-Z0-9._-]+/g, "_") || "archivo";
 }
 
-export function EnvFileItem({ file }: { file: EnvFileView }) {
+export function VaultFileItem({
+  config,
+  file,
+}: {
+  config: VaultConfig;
+  file: VaultFileView;
+}) {
   const router = useRouter();
   const [content, setContent] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
@@ -29,7 +36,7 @@ export function EnvFileItem({ file }: { file: EnvFileView }) {
       return;
     }
     start(async () => {
-      const res = await revealEnvContent(file.id);
+      const res = await revealVaultContent(file.id);
       if (res.error) setError(res.error);
       else setContent(res.content ?? "");
     });
@@ -37,7 +44,7 @@ export function EnvFileItem({ file }: { file: EnvFileView }) {
 
   function startEdit() {
     start(async () => {
-      const res = await revealEnvContent(file.id);
+      const res = await revealVaultContent(file.id);
       if (res.error) setError(res.error);
       else {
         setContent(res.content ?? "");
@@ -49,7 +56,7 @@ export function EnvFileItem({ file }: { file: EnvFileView }) {
   function remove() {
     if (!confirm(`¿Eliminar "${file.name}" y sus links compartidos?`)) return;
     start(async () => {
-      const res = await deleteEnvFile(file.id);
+      const res = await deleteVaultFile(file.id);
       if (res?.error) setError(res.error);
       else router.refresh();
     });
@@ -66,7 +73,7 @@ export function EnvFileItem({ file }: { file: EnvFileView }) {
     URL.revokeObjectURL(url);
   }
 
-  const activeLinks = file.links.filter((l) => !l.revoked).length;
+  const activeLinks = file.links.filter((l) => !l.revoked && !l.expired).length;
 
   return (
     <Card>
@@ -110,7 +117,8 @@ export function EnvFileItem({ file }: { file: EnvFileView }) {
         {error && <p className="text-sm text-destructive">{error}</p>}
 
         {editing ? (
-          <EnvFileForm
+          <VaultFileForm
+            config={config}
             fileId={file.id}
             initialName={file.name}
             initialContent={content ?? ""}

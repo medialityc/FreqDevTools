@@ -9,7 +9,7 @@ export type ShareResolution =
   | { status: "ok"; name: string; content: string };
 
 /**
- * Resuelve un link compartido aplicando, en orden:
+ * Resuelve un link compartido (kind-agnóstico) aplicando, en orden:
  * 1) token existe y no revocado; 2) si EXPIRING, no vencido;
  * 3) hay sesión; 4) correo autorizado o dueño del archivo.
  */
@@ -40,8 +40,7 @@ export async function resolveShareLink(
   const allowed: string[] = JSON.parse(link.allowedEmails);
   const email = session.email?.toLowerCase() ?? "";
   const isOwner = link.envFile.userId === session.userId;
-  const isAllowed = isOwner || allowed.includes(email);
-  if (!isAllowed) return { status: "forbidden" };
+  if (!isOwner && !allowed.includes(email)) return { status: "forbidden" };
 
   try {
     return {

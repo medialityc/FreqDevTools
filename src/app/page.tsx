@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Fingerprint, KeyRound, FileJson, BookOpen } from "lucide-react";
+import { Fingerprint, KeyRound, FileJson, BookOpen, CalendarClock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/Card";
 
 const tools = [
@@ -20,6 +20,12 @@ const tools = [
     title: "Serializar clase C#",
     description: "Convierte una clase C# en JSON de ejemplo.",
     icon: FileJson,
+  },
+  {
+    href: "/tools/datetime",
+    title: "Conversor de fecha",
+    description: "Fecha/hora a DateTime C#, ISO, Unix y ticks.",
+    icon: CalendarClock,
   },
   {
     href: "/skills",

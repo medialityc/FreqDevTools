@@ -7,17 +7,17 @@ import { PageHeader } from "@/components/PageHeader";
 import { VaultManager } from "@/components/vault/VaultManager";
 
 export const metadata: Metadata = {
-  title: "Variables de entorno — FreqDevTools",
+  title: "Workflows de GitHub Actions — FreqDevTools",
 };
 
 export const dynamic = "force-dynamic";
 
-export default async function EnvPage() {
+export default async function WorkflowsPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect("/login?callbackUrl=/env");
+  if (!session?.user?.id) redirect("/login?callbackUrl=/workflows");
 
-  const config = VAULT_CONFIG.ENV;
-  const files = await getUserFiles(session.user.id, "ENV");
+  const config = VAULT_CONFIG.WORKFLOW;
+  const files = await getUserFiles(session.user.id, "WORKFLOW");
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">

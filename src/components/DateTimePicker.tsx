@@ -39,7 +39,7 @@ function dayOfWeek(y: number, m: number, d: number): number {
       Math.floor(J / 4) +
       5 * J) %
     7;
-  return (h + 6) % 7; // convierte 0=Sábado(Zeller) a 0=Domingo
+  return (h + 6) % 7;
 }
 
 interface Ymd {
@@ -55,16 +55,26 @@ function beforeToday(cell: Ymd, today: Ymd | null): boolean {
   return cell.d < today.d;
 }
 
-export function DateTimePicker({ name }: { name: string }) {
+export function DateTimePicker({
+  name,
+  disablePast = true,
+  withSeconds = false,
+  onChange,
+}: {
+  name?: string;
+  disablePast?: boolean;
+  withSeconds?: boolean;
+  onChange?: (value: string) => void;
+}) {
   const [open, setOpen] = useState(false);
   const [today, setToday] = useState<Ymd | null>(null);
   const [view, setView] = useState<{ y: number; m: number } | null>(null);
   const [selected, setSelected] = useState<Ymd | null>(null);
   const [hour, setHour] = useState(9);
   const [minute, setMinute] = useState(0);
+  const [second, setSecond] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Cierra al hacer clic fuera del componente.
   useEffect(() => {
     function onClick(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -75,14 +85,27 @@ export function DateTimePicker({ name }: { name: string }) {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
-  function toggle() {
-    // Inicializa "hoy" y el mes visible dentro del handler (no en render).
+  function buildValue(sel: Ymd | null, h: number, mi: number, se: number): string {
+    if (!sel) return "";
+    const base = `${sel.y}-${pad(sel.m + 1)}-${pad(sel.d)}T${pad(h)}:${pad(mi)}`;
+    return withSeconds ? `${base}:${pad(se)}` : base;
+  }
+
+  function emit(sel: Ymd | null, h: number, mi: number, se: number) {
+    onChange?.(buildValue(sel, h, mi, se));
+  }
+
+  function ensureInit() {
     if (!today) {
       const n = new Date();
       const t = { y: n.getFullYear(), m: n.getMonth(), d: n.getDate() };
       setToday(t);
       if (!view) setView({ y: t.y, m: t.m });
     }
+  }
+
+  function toggle() {
+    ensureInit();
     setOpen((o) => !o);
   }
 
@@ -94,20 +117,24 @@ export function DateTimePicker({ name }: { name: string }) {
     });
   }
 
-  const value = selected
-    ? `${selected.y}-${pad(selected.m + 1)}-${pad(selected.d)}T${pad(hour)}:${pad(minute)}`
-    : "";
+  function pick(cell: Ymd) {
+    setSelected(cell);
+    emit(cell, hour, minute, second);
+  }
 
+  const value = buildValue(selected, hour, minute, second);
   const label = selected
-    ? `${pad(selected.d)}/${pad(selected.m + 1)}/${selected.y} ${pad(hour)}:${pad(minute)}`
+    ? `${pad(selected.d)}/${pad(selected.m + 1)}/${selected.y} ${pad(hour)}:${pad(minute)}${withSeconds ? ":" + pad(second) : ""}`
     : "Selecciona fecha y hora";
 
   const leadingBlanks = view ? dayOfWeek(view.y, view.m, 1) : 0;
   const totalDays = view ? daysInMonth(view.y, view.m) : 0;
+  const minuteStep = withSeconds ? 1 : 5;
+  const minuteCount = 60 / minuteStep;
 
   return (
     <div className="relative" ref={ref}>
-      <input type="hidden" name={name} value={value} />
+      {name && <input type="hidden" name={name} value={value} />}
       <button
         type="button"
         onClick={toggle}
@@ -157,7 +184,7 @@ export function DateTimePicker({ name }: { name: string }) {
             {Array.from({ length: totalDays }).map((_, i) => {
               const d = i + 1;
               const cell = { y: view.y, m: view.m, d };
-              const disabled = beforeToday(cell, today);
+              const disabled = disablePast && beforeToday(cell, today);
               const isSelected =
                 selected?.y === cell.y &&
                 selected?.m === cell.m &&
@@ -169,7 +196,7 @@ export function DateTimePicker({ name }: { name: string }) {
                   key={d}
                   type="button"
                   disabled={disabled}
-                  onClick={() => setSelected(cell)}
+                  onClick={() => pick(cell)}
                   className={cn(
                     "flex h-8 items-center justify-center rounded-lg text-sm transition-colors",
                     disabled && "cursor-not-allowed text-muted-foreground/40",
@@ -188,8 +215,12 @@ export function DateTimePicker({ name }: { name: string }) {
             <span className="text-sm text-muted-foreground">Hora</span>
             <Select
               value={hour}
-              onChange={(e) => setHour(Number(e.target.value))}
-              className="h-9 w-20"
+              onChange={(e) => {
+                const h = Number(e.target.value);
+                setHour(h);
+                emit(selected, h, minute, second);
+              }}
+              className="h-9 w-16"
               aria-label="Hora"
             >
               {Array.from({ length: 24 }).map((_, h) => (
@@ -201,16 +232,41 @@ export function DateTimePicker({ name }: { name: string }) {
             <span>:</span>
             <Select
               value={minute}
-              onChange={(e) => setMinute(Number(e.target.value))}
-              className="h-9 w-20"
+              onChange={(e) => {
+                const mi = Number(e.target.value);
+                setMinute(mi);
+                emit(selected, hour, mi, second);
+              }}
+              className="h-9 w-16"
               aria-label="Minutos"
             >
-              {Array.from({ length: 12 }).map((_, i) => (
-                <option key={i} value={i * 5}>
-                  {pad(i * 5)}
+              {Array.from({ length: minuteCount }).map((_, i) => (
+                <option key={i} value={i * minuteStep}>
+                  {pad(i * minuteStep)}
                 </option>
               ))}
             </Select>
+            {withSeconds && (
+              <>
+                <span>:</span>
+                <Select
+                  value={second}
+                  onChange={(e) => {
+                    const se = Number(e.target.value);
+                    setSecond(se);
+                    emit(selected, hour, minute, se);
+                  }}
+                  className="h-9 w-16"
+                  aria-label="Segundos"
+                >
+                  {Array.from({ length: 60 }).map((_, s) => (
+                    <option key={s} value={s}>
+                      {pad(s)}
+                    </option>
+                  ))}
+                </Select>
+              </>
+            )}
             <button
               type="button"
               onClick={() => setOpen(false)}

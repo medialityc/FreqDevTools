@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { FileText, Lock, TriangleAlert } from "lucide-react";
 import { auth } from "@/lib/auth";
-import { resolveShareLink } from "@/lib/env-share";
+import { resolveShareLink } from "@/lib/vault-share";
 import { Card, CardContent } from "@/components/ui/Card";
 import { ShareView } from "./ShareView";
 

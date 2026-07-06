@@ -1,10 +1,14 @@
 import { prisma } from "@/lib/prisma";
-import type { EnvFileView } from "@/app/env/types";
+import type { VaultKind } from "@/lib/vault";
+import type { VaultFileView } from "@/lib/vault-types";
 
-/** Archivos .env del usuario con sus links (estado de vencimiento incluido). */
-export async function getUserEnvFiles(userId: string): Promise<EnvFileView[]> {
+/** Archivos de un tipo (kind) del usuario, con sus links de compartición. */
+export async function getUserFiles(
+  userId: string,
+  kind: VaultKind,
+): Promise<VaultFileView[]> {
   const rows = await prisma.envFile.findMany({
-    where: { userId },
+    where: { userId, kind },
     orderBy: { updatedAt: "desc" },
     select: {
       id: true,

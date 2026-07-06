@@ -84,13 +84,14 @@ model EnvFile {
   id               String   @id @default(cuid())
   userId           String
   name             String
+  kind             VaultKind @default(ENV)   // ENV | WORKFLOW (bóveda genérica)
   contentEncrypted String                // AES-256-GCM
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   shareLinks       EnvShareLink[]
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  @@index([userId])
+  @@index([userId, kind])
 }
 
 model EnvShareLink {
@@ -107,7 +108,12 @@ model EnvShareLink {
 
 enum Role      { USER ADMIN }
 enum ShareType { EXPIRING UNLIMITED }
+enum VaultKind { ENV WORKFLOW }
 ```
+
+> **Bóveda genérica:** `EnvFile` almacena tanto archivos `.env` (`kind=ENV`) como
+> workflows de GitHub Actions (`kind=WORKFLOW`). Ambos comparten cifrado, links de
+> compartición (`EnvShareLink`) y la ruta pública `/share/[token]`.
 
 ## Entidades
 

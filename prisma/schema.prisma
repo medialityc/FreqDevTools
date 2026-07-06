@@ -78,13 +78,14 @@ model EnvFile {
   id               String   @id @default(cuid())
   userId           String
   name             String
+  kind             VaultKind @default(ENV)
   contentEncrypted String
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   shareLinks       EnvShareLink[]
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  @@index([userId])
+  @@index([userId, kind])
 }
 
 model EnvShareLink {
@@ -107,4 +108,9 @@ enum Role {
 enum ShareType {
   EXPIRING
   UNLIMITED
+}
+
+enum VaultKind {
+  ENV
+  WORKFLOW
 }

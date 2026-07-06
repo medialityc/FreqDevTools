@@ -7,8 +7,9 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { encrypt, decrypt } from "@/lib/crypto";
 import { envFileSchema } from "@/lib/validators";
+import type { VaultKind } from "@/lib/vault";
 
-export type EnvState = { error?: string; success?: boolean } | undefined;
+export type VaultState = { error?: string; success?: boolean } | undefined;
 
 async function requireUserId(): Promise<string> {
   const session = await auth();
@@ -16,10 +17,16 @@ async function requireUserId(): Promise<string> {
   return session.user.id;
 }
 
-export async function createEnvFile(
-  _prev: EnvState,
+function revalidateVault() {
+  revalidatePath("/env");
+  revalidatePath("/workflows");
+}
+
+export async function createVaultFile(
+  kind: VaultKind,
+  _prev: VaultState,
   formData: FormData,
-): Promise<EnvState> {
+): Promise<VaultState> {
   const userId = await requireUserId();
   const parsed = envFileSchema.safeParse({
     name: formData.get("name"),
@@ -32,19 +39,20 @@ export async function createEnvFile(
   await prisma.envFile.create({
     data: {
       userId,
+      kind,
       name: parsed.data.name,
       contentEncrypted: encrypt(parsed.data.content),
     },
   });
-  revalidatePath("/env");
+  revalidateVault();
   return { success: true };
 }
 
-export async function updateEnvFile(
+export async function updateVaultFile(
   id: string,
-  _prev: EnvState,
+  _prev: VaultState,
   formData: FormData,
-): Promise<EnvState> {
+): Promise<VaultState> {
   const userId = await requireUserId();
   const parsed = envFileSchema.safeParse({
     name: formData.get("name"),
@@ -67,20 +75,19 @@ export async function updateEnvFile(
       contentEncrypted: encrypt(parsed.data.content),
     },
   });
-  revalidatePath("/env");
+  revalidateVault();
   return { success: true };
 }
 
-export async function deleteEnvFile(id: string): Promise<EnvState> {
+export async function deleteVaultFile(id: string): Promise<VaultState> {
   const userId = await requireUserId();
   const res = await prisma.envFile.deleteMany({ where: { id, userId } });
   if (res.count === 0) return { error: "No encontrado." };
-  revalidatePath("/env");
+  revalidateVault();
   return { success: true };
 }
 
-/** Descifra el contenido bajo demanda para el dueño (ver/editar). */
-export async function revealEnvContent(
+export async function revealVaultContent(
   id: string,
 ): Promise<{ content?: string; error?: string }> {
   const userId = await requireUserId();
@@ -101,21 +108,18 @@ function parseEmails(raw: string): string[] {
     .split(/[\s,;]+/)
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
-  const valid = parts.filter(
-    (e) => z.string().email().safeParse(e).success,
-  );
+  const valid = parts.filter((e) => z.string().email().safeParse(e).success);
   return [...new Set(valid)];
 }
 
-export async function createShareLink(
-  envFileId: string,
-  _prev: EnvState,
+export async function createVaultShareLink(
+  fileId: string,
+  _prev: VaultState,
   formData: FormData,
-): Promise<EnvState> {
+): Promise<VaultState> {
   const userId = await requireUserId();
-
   const owned = await prisma.envFile.findFirst({
-    where: { id: envFileId, userId },
+    where: { id: fileId, userId },
     select: { id: true },
   });
   if (!owned) return { error: "No encontrado." };
@@ -141,25 +145,26 @@ export async function createShareLink(
 
   await prisma.envShareLink.create({
     data: {
-      envFileId,
+      envFileId: fileId,
       token: randomBytes(24).toString("base64url"),
       type,
       expiresAt,
       allowedEmails: JSON.stringify(emails),
     },
   });
-  revalidatePath("/env");
+  revalidateVault();
   return { success: true };
 }
 
-export async function revokeShareLink(linkId: string): Promise<EnvState> {
+export async function revokeVaultShareLink(
+  linkId: string,
+): Promise<VaultState> {
   const userId = await requireUserId();
-  // Solo revoca si el link pertenece a un archivo del usuario.
   const res = await prisma.envShareLink.updateMany({
     where: { id: linkId, envFile: { userId } },
     data: { revoked: true },
   });
   if (res.count === 0) return { error: "No encontrado." };
-  revalidatePath("/env");
+  revalidateVault();
   return { success: true };
 }
