@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  role         Role     @default(USER)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  skills       Skill[]
+  votes        SkillVote[]
+  credentials  Credential[]
+  envFiles     EnvFile[]
+}
+
+model Skill {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  content     String
+  category    String
+  copyCount   Int      @default(0)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  votes       SkillVote[]
+  copies      SkillCopy[]
+  createdAt   DateTime @default(now())
+
+  @@index([category])
+  @@index([createdAt])
+}
+
+model SkillCopy {
+  id        String   @id @default(cuid())
+  skillId   String
+  copierKey String // "user:<id>" o "anon:<cookie>"
+  createdAt DateTime @default(now())
+  skill     Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([skillId, copierKey])
+}
+
+model SkillVote {
+  id      String @id @default(cuid())
+  skillId String
+  userId  String
+  value   Int
+  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([skillId, userId])
+}
+
+model Credential {
+  id              String   @id @default(cuid())
+  userId          String
+  name            String
+  domain          String?
+  username        String?
+  secretEncrypted String
+  notes           String?
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model EnvFile {
+  id               String   @id @default(cuid())
+  userId           String
+  name             String
+  contentEncrypted String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shareLinks       EnvShareLink[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model EnvShareLink {
+  id            String    @id @default(cuid())
+  envFileId     String
+  token         String    @unique
+  type          ShareType
+  expiresAt     DateTime?
+  revoked       Boolean   @default(false)
+  allowedEmails String
+  envFile       EnvFile   @relation(fields: [envFileId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ShareType {
+  EXPIRING
+  UNLIMITED
+}
