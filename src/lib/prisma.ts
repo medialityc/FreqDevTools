@@ -1,4 +1,4 @@
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
 
 const databaseUrl = process.env.DATABASE_URL;
@@ -7,7 +7,8 @@ if (!databaseUrl) {
 }
 
 const createPrismaClient = () => {
-  const adapter = new PrismaBetterSqlite3({ url: databaseUrl });
+  // En runtime (serverless) se usa la cadena del pooler de conexiones.
+  const adapter = new PrismaPg({ connectionString: databaseUrl });
   return new PrismaClient({ adapter });
 };
 

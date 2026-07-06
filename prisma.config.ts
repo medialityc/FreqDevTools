@@ -13,6 +13,8 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: env("DATABASE_URL"),
+    // Las migraciones usan la conexión directa (puerto 5432) si está
+    // definida; si no, caen a DATABASE_URL.
+    url: process.env.DIRECT_URL ?? env("DATABASE_URL"),
   },
 });

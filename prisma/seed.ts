@@ -1,4 +1,4 @@
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "../src/generated/prisma/client";
 
@@ -12,10 +12,10 @@ const ADMIN_EMAIL = "admin@freqdevtools.com";
 const ADMIN_PASSWORD = "admin_devtools";
 
 async function main() {
-  const url = process.env.DATABASE_URL;
+  const url = process.env.DIRECT_URL ?? process.env.DATABASE_URL;
   if (!url) throw new Error("Falta DATABASE_URL");
 
-  const adapter = new PrismaBetterSqlite3({ url });
+  const adapter = new PrismaPg({ connectionString: url });
   const prisma = new PrismaClient({ adapter });
 
   const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 12);

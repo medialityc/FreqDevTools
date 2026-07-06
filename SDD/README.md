@@ -19,7 +19,7 @@ Una plataforma con herramientas de uso diario para desarrolladores, más zonas p
 | Framework | Next.js 16.2.10 (App Router, React Compiler) |
 | UI | React 19, Tailwind CSS v4 (CSS-first), lucide-react |
 | Lenguaje | TypeScript (strict), alias `@/*` → `src/*` |
-| DB / ORM | SQLite + Prisma |
+| DB / ORM | PostgreSQL (Supabase) + Prisma (adapter `@prisma/adapter-pg`) |
 | Auth | Auth.js (NextAuth v5), Credentials provider, sesión JWT |
 | Hash | bcryptjs |
 | Cifrado | AES-256-GCM (módulo `crypto` nativo de Node) |
@@ -83,7 +83,12 @@ prisma/
 ## Variables de entorno
 
 ```
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="postgresql://...pooler.supabase.com:6543/postgres?pgbouncer=true"  # runtime
+DIRECT_URL="postgresql://...pooler.supabase.com:5432/postgres"                    # migraciones
 AUTH_SECRET="<random 32+ chars>"
 ENCRYPTION_KEY="<32 bytes en base64>"
 ```
+
+En **Vercel** hay que definir estas 4 variables en Project Settings → Environment
+Variables. Migraciones y seed se aplican a Supabase con la conexión directa:
+`pnpm prisma migrate deploy && pnpm prisma db seed`.

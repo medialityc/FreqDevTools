@@ -1,18 +1,24 @@
 # Modelo de datos
 
-Base de datos SQLite gestionada con Prisma. Archivo `prisma/schema.prisma`.
+Base de datos **PostgreSQL** (Supabase en producción) gestionada con Prisma
+mediante el driver adapter `@prisma/adapter-pg`. Archivo `prisma/schema.prisma`.
+
+- **Runtime (serverless/Vercel):** `DATABASE_URL` = pooler de Supabase (Transaction, 6543).
+- **Migraciones/seed:** `DIRECT_URL` = conexión directa (5432).
 
 ## Esquema
 
 ```prisma
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
 }
+// La URL se define en prisma.config.ts (DIRECT_URL para migraciones)
+// y en el adapter pg en runtime (DATABASE_URL).
 
 model User {
   id           String   @id @default(cuid())

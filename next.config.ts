@@ -2,11 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
-  // Módulos nativos / de servidor que no deben empaquetarse por el bundler.
-  serverExternalPackages: [
-    "better-sqlite3",
-    "@prisma/adapter-better-sqlite3",
-  ],
+  // El driver de Postgres no debe empaquetarse por el bundler.
+  serverExternalPackages: ["pg", "@prisma/adapter-pg"],
 };
 
 export default nextConfig;
