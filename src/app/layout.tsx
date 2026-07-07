@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
@@ -20,9 +21,6 @@ export const metadata: Metadata = {
     "GUIDs, API keys, serializador C#, skills y gestión segura de credenciales y variables de entorno.",
 };
 
-// Se ejecuta antes del paint para aplicar el tema guardado y evitar parpadeo.
-const themeScript = `(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -34,10 +32,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
       <body className="min-h-full flex flex-col">
+        {/* Aplica el tema guardado antes de hidratar (evita parpadeo). Script
+            externo con src vía next/script: sin warning de script inline. */}
+        <Script src="/theme-init.js" strategy="beforeInteractive" />
         <Providers>
           <Nav />
           <main className="flex-1">{children}</main>

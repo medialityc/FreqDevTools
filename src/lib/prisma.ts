@@ -8,7 +8,12 @@ if (!databaseUrl) {
 
 const createPrismaClient = () => {
   // En runtime (serverless) se usa la cadena del pooler de conexiones.
-  const adapter = new PrismaPg({ connectionString: databaseUrl });
+  // SSL sin verificación de cadena: el pooler de Supabase presenta un
+  // certificado que node-postgres no valida contra las CA del sistema.
+  const adapter = new PrismaPg({
+    connectionString: databaseUrl,
+    ssl: { rejectUnauthorized: false },
+  });
   return new PrismaClient({ adapter });
 };
 

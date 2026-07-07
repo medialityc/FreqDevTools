@@ -15,7 +15,10 @@ async function main() {
   const url = process.env.DIRECT_URL ?? process.env.DATABASE_URL;
   if (!url) throw new Error("Falta DATABASE_URL");
 
-  const adapter = new PrismaPg({ connectionString: url });
+  const adapter = new PrismaPg({
+    connectionString: url,
+    ssl: { rejectUnauthorized: false },
+  });
   const prisma = new PrismaClient({ adapter });
 
   const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 12);
