@@ -6,13 +6,17 @@ if (!databaseUrl) {
   throw new Error("Falta la variable de entorno DATABASE_URL");
 }
 
+// El pooler de Supabase exige SSL (con un certificado que node-postgres no
+// valida contra las CA del sistema). Los hosts internos de CapRover
+// (srv-captain--*) no tienen SSL habilitado, así que solo se activa cuando
+// la URL apunta a Supabase o lo pide explícitamente vía sslmode=require.
+const needsSsl = (url: string) =>
+  /supabase\.(co|com)/.test(url) || /sslmode=require/.test(url);
+
 const createPrismaClient = () => {
-  // En runtime (serverless) se usa la cadena del pooler de conexiones.
-  // SSL sin verificación de cadena: el pooler de Supabase presenta un
-  // certificado que node-postgres no valida contra las CA del sistema.
   const adapter = new PrismaPg({
     connectionString: databaseUrl,
-    ssl: { rejectUnauthorized: false },
+    ssl: needsSsl(databaseUrl) ? { rejectUnauthorized: false } : undefined,
   });
   return new PrismaClient({ adapter });
 };

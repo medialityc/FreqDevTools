@@ -104,9 +104,10 @@ async function main() {
   if (!ADMIN_EMAIL) throw new Error("Falta ADMIN_EMAIL");
   if (!ADMIN_PASSWORD) throw new Error("Falta ADMIN_PASSWORD");
 
+  const needsSsl = /supabase\.(co|com)/.test(url) || /sslmode=require/.test(url);
   const adapter = new PrismaPg({
     connectionString: url,
-    ssl: { rejectUnauthorized: false },
+    ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
   });
   const prisma = new PrismaClient({ adapter });
 

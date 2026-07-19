@@ -1,0 +1,30 @@
+name: Deploy to CapRover
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    environment: dev
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Create .env file from secrets
+        env:
+          ENV_FILE: ${{ secrets.ENV }}
+        run: printf '%s\n' "$ENV_FILE" > .env
+
+      - name: Create deploy.tar for CapRover
+        run: tar --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='.next' --exclude='deploy.tar' -cvf deploy.tar .
+
+      - name: Deploy to CapRover
+        uses: caprover/deploy-from-github@v1.1.2
+        with:
+          server: "${{ secrets.CAPROVER_SERVER }}"
+          app: "${{ secrets.CAPROVER_APP_NAME }}"
+          token: "${{ secrets.CAPROVER_APP_TOKEN }}"
