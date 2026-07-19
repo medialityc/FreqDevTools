@@ -14,28 +14,21 @@ const publicLinks = [
   { href: "/skills", label: "Skills" },
 ];
 
-const privateLinks = [
-  { href: "/credentials", label: "Credenciales" },
-  { href: "/env", label: "Env" },
-  { href: "/workflows", label: "Workflows" },
-];
-
 export async function Nav() {
   const session = await auth();
   const user = session?.user;
-  const links = user ? [...publicLinks, ...privateLinks] : publicLinks;
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur">
       <nav className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
-        <MobileMenu links={links} />
+        <MobileMenu links={publicLinks} />
         <Link href="/" className="flex items-center gap-2 font-semibold">
           <Terminal className="h-5 w-5 text-primary" />
           <span>FreqDevTools</span>
         </Link>
 
         <div className="hidden flex-1 items-center gap-1 md:flex">
-          {links.map((l) => (
+          {publicLinks.map((l) => (
             <Link
               key={l.href}
               href={l.href}

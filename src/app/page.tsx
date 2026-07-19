@@ -94,8 +94,7 @@ export default async function Home() {
           FreqDevTools
         </h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
-          Herramientas útiles para desarrolladores web, más gestión segura de
-          credenciales, variables de entorno y workflows.
+          Herramientas útiles para desarrolladores web.
         </p>
       </section>
 

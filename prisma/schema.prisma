@@ -17,8 +17,6 @@ model User {
   createdAt    DateTime @default(now())
   skills       Skill[]
   votes        SkillVote[]
-  credentials  Credential[]
-  envFiles     EnvFile[]
 }
 
 model Skill {
@@ -59,58 +57,7 @@ model SkillVote {
   @@unique([skillId, userId])
 }
 
-model Credential {
-  id              String   @id @default(cuid())
-  userId          String
-  name            String
-  domain          String?
-  username        String?
-  secretEncrypted String
-  notes           String?
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@index([userId])
-}
-
-model EnvFile {
-  id               String   @id @default(cuid())
-  userId           String
-  name             String
-  kind             VaultKind @default(ENV)
-  contentEncrypted String
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  shareLinks       EnvShareLink[]
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  @@index([userId, kind])
-}
-
-model EnvShareLink {
-  id            String    @id @default(cuid())
-  envFileId     String
-  token         String    @unique
-  type          ShareType
-  expiresAt     DateTime?
-  revoked       Boolean   @default(false)
-  allowedEmails String
-  envFile       EnvFile   @relation(fields: [envFileId], references: [id], onDelete: Cascade)
-  createdAt     DateTime  @default(now())
-}
-
 enum Role {
   USER
   ADMIN
-}
-
-enum ShareType {
-  EXPIRING
-  UNLIMITED
-}
-
-enum VaultKind {
-  ENV
-  WORKFLOW
 }
