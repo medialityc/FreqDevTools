@@ -11,6 +11,7 @@ const publicLinks = [
   { href: "/tools/api-keys", label: "API Keys" },
   { href: "/tools/csharp-serializer", label: "C# → JSON" },
   { href: "/tools/datetime", label: "DateTime" },
+  { href: "/tools/appsettings", label: "appsettings.json" },
   { href: "/skills", label: "Skills" },
 ];
 

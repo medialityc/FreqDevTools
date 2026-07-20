@@ -4,6 +4,7 @@ import {
   KeyRound,
   FileJson,
   CalendarClock,
+  Settings2,
   ArrowBigUp,
   Copy,
   Clock,
@@ -43,6 +44,12 @@ const tools = [
     title: "Conversor de fecha",
     description: "Fecha/hora a DateTime C#, ISO, Unix y ticks.",
     icon: CalendarClock,
+  },
+  {
+    href: "/tools/appsettings",
+    title: "Generador de appsettings.json",
+    description: "Texto clave=valor anidado con ':' a JSON de .NET.",
+    icon: Settings2,
   },
 ];
 
