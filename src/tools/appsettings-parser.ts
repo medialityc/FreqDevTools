@@ -99,3 +99,47 @@ export function keyValueToAppSettingsJson(text: string): string {
   const root = parseKeyValueConfig(text);
   return JSON.stringify(arrayify(root), null, 2);
 }
+
+function stringifyLeaf(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "boolean") return value ? "true" : "false";
+  return String(value);
+}
+
+function flatten(value: unknown, path: string[], lines: string[]): void {
+  if (Array.isArray(value)) {
+    value.forEach((item, i) => flatten(item, [...path, String(i)], lines));
+    return;
+  }
+  if (value !== null && typeof value === "object") {
+    Object.entries(value as Record<string, unknown>).forEach(([key, v]) =>
+      flatten(v, [...path, key], lines),
+    );
+    return;
+  }
+  if (path.length === 0) return;
+  lines.push(`${path.join(":")}=${stringifyLeaf(value)}`);
+}
+
+/** Convierte un appsettings.json en texto clave=valor (con anidación ":"). */
+export function appSettingsJsonToKeyValue(text: string): string {
+  let data: unknown;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error("El texto no es un JSON válido.");
+  }
+
+  if (typeof data !== "object" || data === null) {
+    throw new Error("El JSON debe ser un objeto.");
+  }
+
+  const lines: string[] = [];
+  flatten(data, [], lines);
+
+  if (lines.length === 0) {
+    throw new Error("El JSON no contiene pares clave=valor.");
+  }
+
+  return lines.join("\n");
+}

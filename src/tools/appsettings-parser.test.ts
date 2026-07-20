@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { keyValueToAppSettingsJson, parseKeyValueConfig } from "./appsettings-parser";
+import {
+  appSettingsJsonToKeyValue,
+  keyValueToAppSettingsJson,
+  parseKeyValueConfig,
+} from "./appsettings-parser";
 
 describe("parseKeyValueConfig", () => {
   it("mapea pares clave=valor planos", () => {
@@ -89,5 +93,68 @@ describe("keyValueToAppSettingsJson", () => {
         logs: "Host=srv-captain--pro-contacts-sync-logs-db;Port=5432;Database=zascontactsynclogs",
       },
     });
+  });
+});
+
+describe("appSettingsJsonToKeyValue", () => {
+  it("aplana un objeto anidado en pares clave=valor con ':'", () => {
+    const result = appSettingsJsonToKeyValue(
+      JSON.stringify({
+        BaseUrl: "Valor1",
+        Logging: { LogLevel: { Default: "Information", System: "Warning" } },
+      }),
+    );
+    expect(result.split("\n").sort()).toEqual(
+      [
+        "BaseUrl=Valor1",
+        "Logging:LogLevel:Default=Information",
+        "Logging:LogLevel:System=Warning",
+      ].sort(),
+    );
+  });
+
+  it("convierte arreglos en claves numéricas secuenciales", () => {
+    const result = appSettingsJsonToKeyValue(
+      JSON.stringify({
+        Cors: { AllowedOrigins: ["https://a.com", "https://b.com"] },
+      }),
+    );
+    expect(result.split("\n").sort()).toEqual(
+      [
+        "Cors:AllowedOrigins:0=https://a.com",
+        "Cors:AllowedOrigins:1=https://b.com",
+      ].sort(),
+    );
+  });
+
+  it("serializa booleanos como true/false", () => {
+    const result = appSettingsJsonToKeyValue(
+      JSON.stringify({ FeatureX: { Enabled: true, Beta: false } }),
+    );
+    expect(result.split("\n").sort()).toEqual(
+      ["FeatureX:Enabled=true", "FeatureX:Beta=false"].sort(),
+    );
+  });
+
+  it("es el inverso de keyValueToAppSettingsJson", () => {
+    const original =
+      "BaseUrl=Valor1\nLogging:LogLevel:Default=Information\nLogging:LogLevel:System=Warning";
+    const json = keyValueToAppSettingsJson(original);
+    const roundTripped = appSettingsJsonToKeyValue(json);
+    expect(JSON.parse(keyValueToAppSettingsJson(roundTripped))).toEqual(
+      JSON.parse(json),
+    );
+  });
+
+  it("lanza error si el texto no es JSON válido", () => {
+    expect(() => appSettingsJsonToKeyValue("no es json")).toThrow();
+  });
+
+  it("lanza error si el JSON no es un objeto", () => {
+    expect(() => appSettingsJsonToKeyValue('"solo un string"')).toThrow();
+  });
+
+  it("lanza error si el JSON es un objeto vacío", () => {
+    expect(() => appSettingsJsonToKeyValue("{}")).toThrow();
   });
 });
