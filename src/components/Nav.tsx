@@ -12,6 +12,7 @@ const publicLinks = [
   { href: "/tools/csharp-serializer", label: "C# → JSON" },
   { href: "/tools/datetime", label: "DateTime" },
   { href: "/tools/appsettings", label: "appsettings.json" },
+  { href: "/tools/password", label: "Contraseñas" },
   { href: "/skills", label: "Skills" },
 ];
 

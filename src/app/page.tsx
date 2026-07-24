@@ -5,6 +5,7 @@ import {
   FileJson,
   CalendarClock,
   Settings2,
+  Lock,
   ArrowBigUp,
   Copy,
   Clock,
@@ -50,6 +51,12 @@ const tools = [
     title: "Generador de appsettings.json",
     description: "Texto clave=valor anidado con ':' a JSON de .NET.",
     icon: Settings2,
+  },
+  {
+    href: "/tools/password",
+    title: "Generador de contraseñas",
+    description: "Contraseñas seguras: longitud, símbolos y mayúsculas.",
+    icon: Lock,
   },
 ];
 
