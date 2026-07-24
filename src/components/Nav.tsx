@@ -1,10 +1,7 @@
 import Link from "next/link";
 import { Terminal } from "lucide-react";
-import { auth } from "@/lib/auth";
-import { logout } from "@/actions/auth";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { MobileMenu } from "@/components/MobileMenu";
-import { Button } from "@/components/ui/Button";
 
 const publicLinks = [
   { href: "/tools/guid", label: "GUID" },
@@ -16,10 +13,7 @@ const publicLinks = [
   { href: "/skills", label: "Skills" },
 ];
 
-export async function Nav() {
-  const session = await auth();
-  const user = session?.user;
-
+export function Nav() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur">
       <nav className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
@@ -43,29 +37,6 @@ export async function Nav() {
 
         <div className="ml-auto flex items-center gap-2">
           <ThemeToggle />
-          {user ? (
-            <div className="flex items-center gap-2">
-              {user.role === "ADMIN" && (
-                <Link href="/admin">
-                  <Button variant="outline" size="sm">
-                    Admin
-                  </Button>
-                </Link>
-              )}
-              <span className="hidden text-sm text-muted-foreground sm:inline">
-                {user.email}
-              </span>
-              <form action={logout}>
-                <Button variant="ghost" size="sm" type="submit">
-                  Salir
-                </Button>
-              </form>
-            </div>
-          ) : (
-            <Link href="/login">
-              <Button size="sm">Iniciar sesión</Button>
-            </Link>
-          )}
         </div>
       </nav>
     </header>

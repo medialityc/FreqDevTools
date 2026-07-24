@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Providers } from "@/components/Providers";
 import { Nav } from "@/components/Nav";
 
 const geistSans = Geist({
@@ -36,10 +35,8 @@ export default function RootLayout({
         {/* Aplica el tema guardado antes de hidratar (evita parpadeo). Script
             externo con src vía next/script: sin warning de script inline. */}
         <Script src="/theme-init.js" strategy="beforeInteractive" />
-        <Providers>
-          <Nav />
-          <main className="flex-1">{children}</main>
-        </Providers>
+        <Nav />
+        <main className="flex-1">{children}</main>
       </body>
     </html>
   );

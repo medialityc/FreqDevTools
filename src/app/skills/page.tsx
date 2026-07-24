@@ -21,8 +21,7 @@ export default async function SkillsPage({
   searchParams: Promise<{ category?: string; sort?: string; q?: string }>;
 }) {
   const sp = await searchParams;
-  const sort: SkillSort =
-    sp.sort === "copies" || sp.sort === "recent" ? sp.sort : "votes";
+  const sort: SkillSort = sp.sort === "copies" ? "copies" : "recent";
   const skills = await getSkillsList({ category: sp.category, sort, q: sp.q });
 
   return (

@@ -9,21 +9,6 @@ export interface SkillListItem {
   copyCount: number;
   createdAt: string;
   authorName: string;
-  score: number;
-}
-
-/** Mapa skillId -> suma de votos. */
-async function getVoteScores(
-  skillIds?: string[],
-): Promise<Map<string, number>> {
-  const groups = await prisma.skillVote.groupBy({
-    by: ["skillId"],
-    _sum: { value: true },
-    where: skillIds ? { skillId: { in: skillIds } } : undefined,
-  });
-  const map = new Map<string, number>();
-  for (const g of groups) map.set(g.skillId, g._sum.value ?? 0);
-  return map;
 }
 
 function authorLabel(author: { name: string | null; email: string }): string {
@@ -50,7 +35,6 @@ export async function getSkillsList(opts: {
     },
     include: { author: { select: { name: true, email: true } } },
   });
-  const scores = await getVoteScores();
 
   const items: SkillListItem[] = skills.map((s) => ({
     id: s.id,
@@ -60,7 +44,6 @@ export async function getSkillsList(opts: {
     copyCount: s.copyCount,
     createdAt: s.createdAt.toISOString(),
     authorName: authorLabel(s.author),
-    score: scores.get(s.id) ?? 0,
   }));
 
   switch (opts.sort) {
@@ -68,11 +51,8 @@ export async function getSkillsList(opts: {
       items.sort((a, b) => b.copyCount - a.copyCount);
       break;
     case "recent":
-      items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-      break;
-    case "votes":
     default:
-      items.sort((a, b) => b.score - a.score || b.createdAt.localeCompare(a.createdAt));
+      items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
       break;
   }
   return items;
@@ -80,27 +60,14 @@ export async function getSkillsList(opts: {
 
 export interface SkillDetail extends SkillListItem {
   content: string;
-  userVote: number; // -1, 0, 1
 }
 
-export async function getSkillDetail(
-  id: string,
-  userId?: string,
-): Promise<SkillDetail | null> {
+export async function getSkillDetail(id: string): Promise<SkillDetail | null> {
   const skill = await prisma.skill.findUnique({
     where: { id },
     include: { author: { select: { name: true, email: true } } },
   });
   if (!skill) return null;
-
-  const scores = await getVoteScores([id]);
-  let userVote = 0;
-  if (userId) {
-    const vote = await prisma.skillVote.findUnique({
-      where: { skillId_userId: { skillId: id, userId } },
-    });
-    userVote = vote?.value ?? 0;
-  }
 
   return {
     id: skill.id,
@@ -110,8 +77,6 @@ export async function getSkillDetail(
     copyCount: skill.copyCount,
     createdAt: skill.createdAt.toISOString(),
     authorName: authorLabel(skill.author),
-    score: scores.get(id) ?? 0,
     content: skill.content,
-    userVote,
   };
 }

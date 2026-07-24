@@ -13,10 +13,9 @@ export const SKILL_CATEGORIES = [
 
 export type SkillCategory = (typeof SKILL_CATEGORIES)[number];
 
-export type SkillSort = "votes" | "copies" | "recent";
+export type SkillSort = "copies" | "recent";
 
 export const SKILL_SORTS: { value: SkillSort; label: string }[] = [
-  { value: "votes", label: "Más votadas" },
-  { value: "copies", label: "Más copiadas" },
   { value: "recent", label: "Más recientes" },
+  { value: "copies", label: "Más copiadas" },
 ];

@@ -1,5 +1,4 @@
 import { PrismaPg } from "@prisma/adapter-pg";
-import bcrypt from "bcryptjs";
 import { PrismaClient } from "../src/generated/prisma/client";
 
 try {
@@ -8,8 +7,8 @@ try {
   // .env ausente: se asume que las variables ya están inyectadas.
 }
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+// Autor único al que se atribuyen las skills anónimas (login eliminado).
+const ANON_AUTHOR_EMAIL = "anonimo@freqdevtools.local";
 
 // ---------------------------------------------------------------------------
 // Datos de ejemplo
@@ -101,8 +100,6 @@ const SKILLS: { title: string; description: string; category: string; content: s
 async function main() {
   const url = process.env.DIRECT_URL ?? process.env.DATABASE_URL;
   if (!url) throw new Error("Falta DATABASE_URL");
-  if (!ADMIN_EMAIL) throw new Error("Falta ADMIN_EMAIL");
-  if (!ADMIN_PASSWORD) throw new Error("Falta ADMIN_PASSWORD");
 
   const needsSsl = /supabase\.(co|com)/.test(url) || /sslmode=require/.test(url);
   const adapter = new PrismaPg({
@@ -111,32 +108,30 @@ async function main() {
   });
   const prisma = new PrismaClient({ adapter });
 
-  const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 12);
-
-  const admin = await prisma.user.upsert({
-    where: { email: ADMIN_EMAIL },
-    update: { role: "ADMIN", isActive: true },
+  const author = await prisma.user.upsert({
+    where: { email: ANON_AUTHOR_EMAIL },
+    update: {},
     create: {
-      email: ADMIN_EMAIL,
-      name: "Administrador",
-      passwordHash,
-      role: "ADMIN",
+      email: ANON_AUTHOR_EMAIL,
+      name: "Anónimo",
+      passwordHash: "-", // login deshabilitado; nunca se usa
+      role: "USER",
       isActive: true,
     },
   });
 
-  console.log(`Admin listo: ${admin.email} (rol ${admin.role})`);
+  console.log(`Autor anónimo listo: ${author.email}`);
 
   // Skills (idempotente por título + autor)
   let skillsCreated = 0;
   for (const s of SKILLS) {
     const exists = await prisma.skill.findFirst({
-      where: { title: s.title, authorId: admin.id },
+      where: { title: s.title, authorId: author.id },
       select: { id: true },
     });
     if (exists) continue;
     await prisma.skill.create({
-      data: { ...s, authorId: admin.id },
+      data: { ...s, authorId: author.id },
     });
     skillsCreated++;
   }

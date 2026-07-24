@@ -10,7 +10,7 @@ export function SkillFilters() {
   const router = useRouter();
   const params = useSearchParams();
   const category = params.get("category") ?? "";
-  const sort = params.get("sort") ?? "votes";
+  const sort = params.get("sort") ?? "recent";
   const [q, setQ] = useState(params.get("q") ?? "");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 

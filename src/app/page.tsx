@@ -6,17 +6,11 @@ import {
   CalendarClock,
   Settings2,
   Lock,
-  ArrowBigUp,
   Copy,
   Clock,
-  Users,
-  Shield,
 } from "lucide-react";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { getSkillsList, type SkillListItem } from "@/lib/skill-queries";
 import { Card, CardContent } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
 import { SkillCard } from "@/components/SkillCard";
 
 export const dynamic = "force-dynamic";
@@ -89,17 +83,11 @@ function SkillSection({
 }
 
 export default async function Home() {
-  const session = await auth();
-  const isAdmin = session?.user?.role === "ADMIN";
-
-  const all = await getSkillsList({ sort: "votes" });
-  const topVoted = all.slice(0, 3);
-  const topCopied = [...all].sort((a, b) => b.copyCount - a.copyCount).slice(0, 3);
-  const recent = [...all]
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  const all = await getSkillsList({ sort: "recent" });
+  const recent = all.slice(0, 3);
+  const topCopied = [...all]
+    .sort((a, b) => b.copyCount - a.copyCount)
     .slice(0, 3);
-
-  const userCount = isAdmin ? await prisma.user.count() : 0;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
@@ -111,41 +99,6 @@ export default async function Home() {
           Herramientas útiles para desarrolladores web.
         </p>
       </section>
-
-      {isAdmin && (
-        <section className="mb-10">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Card>
-              <CardContent className="flex items-center gap-4">
-                <div className="rounded-lg bg-primary/15 p-3">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <div className="text-3xl font-bold">{userCount}</div>
-                  <div className="text-sm text-muted-foreground">
-                    usuarios registrados
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="flex h-full items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <Shield className="h-6 w-6 text-primary" />
-                  <span className="text-sm text-muted-foreground">
-                    Panel de administración
-                  </span>
-                </div>
-                <Link href="/admin">
-                  <Button size="sm" variant="outline">
-                    Gestionar
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-      )}
 
       <section className="mb-12">
         <h2 className="mb-4 text-lg font-semibold">Herramientas</h2>
@@ -179,21 +132,16 @@ export default async function Home() {
             Ver todas
           </Link>
         </div>
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2">
           <SkillSection
-            title="Más votadas"
-            icon={<ArrowBigUp className="h-4 w-4" />}
-            items={topVoted}
+            title="Más recientes"
+            icon={<Clock className="h-4 w-4" />}
+            items={recent}
           />
           <SkillSection
             title="Más copiadas"
             icon={<Copy className="h-4 w-4" />}
             items={topCopied}
-          />
-          <SkillSection
-            title="Más recientes"
-            icon={<Clock className="h-4 w-4" />}
-            items={recent}
           />
         </div>
       </section>

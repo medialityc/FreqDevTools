@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowBigUp, Copy } from "lucide-react";
+import { Copy } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/Card";
 import type { SkillListItem } from "@/lib/skill-queries";
 
@@ -20,10 +20,6 @@ export function SkillCard({ skill }: { skill: SkillListItem }) {
             </p>
           )}
           <div className="mt-auto flex items-center gap-4 pt-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <ArrowBigUp className="h-4 w-4" />
-              {skill.score}
-            </span>
             <span className="flex items-center gap-1">
               <Copy className="h-3.5 w-3.5" />
               {skill.copyCount}
