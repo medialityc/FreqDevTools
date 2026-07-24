@@ -13,13 +13,13 @@ import { CopyButton } from "@/components/CopyButton";
 
 type Direction = "kv-to-json" | "json-to-kv";
 
-const SAMPLE_KV = `BaseUrl=https://api.zas.com
+const SAMPLE_KV = `BaseUrl=https://api.example.com
 Logging:LogLevel:Default=Information
 Logging:LogLevel:System=Warning
-ConnectionStrings:logs = Host=srv-captain--pro-contacts-sync-logs-db;Port=5432;Database=zascontactsynclogs`;
+ConnectionStrings:logs = Host=host-db;Port=5432;Database=dbname`;
 
 const SAMPLE_JSON = `{
-  "BaseUrl": "https://api.zas.com",
+  "BaseUrl": "https://api.example.com",
   "Logging": {
     "LogLevel": {
       "Default": "Information",

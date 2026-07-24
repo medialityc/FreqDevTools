@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "FreqDevTools — Herramientas para desarrolladores",
   description:
-    "GUIDs, API keys, serializador C#, skills y gestión segura de credenciales y variables de entorno.",
+    "GUIDs, API keys, contraseñas, serializador C#, conversor de fechas, skills y demás herramientas de desarrollo.",
 };
 
 export default function RootLayout({

@@ -16,7 +16,7 @@ export function PasswordTool() {
   const [numbersOnly, setNumbersOnly] = useState(false);
   const [requireSpecial, setRequireSpecial] = useState(true);
   const [requireUppercase, setRequireUppercase] = useState(false);
-  const [count, setCount] = useState(5);
+  const [count, setCount] = useState(1);
   const [items, setItems] = useState<string[]>([]);
 
   function toggleLettersOnly(checked: boolean) {
